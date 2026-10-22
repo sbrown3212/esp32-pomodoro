@@ -10,7 +10,7 @@ I want a dedicated, physical Pomodoro timer on my desk. Phone and computer timer
 
 ## Solution
 
-A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two buttons, powered over USB, with no connectivity. It alternates 25-minute Focus and 5-minute Break Intervals. **Primary** always starts or stops the clock; **Next** always ends the current Interval and readies the next type. When an Interval reaches its planned duration it continues into Overtime, counting up visibly with an on-screen alert, until I press Next. Intervals never start by themselves. The display blanks when nothing is happening, to protect the OLED from burn-in.
+A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two buttons, powered over USB, with no connectivity. It alternates 25-minute Focus and 5-minute Break Intervals. **Primary** always starts or stops the clock; **Next** always ends the current Interval and readies the next type. When an Interval reaches its planned duration it continues into Overtime, counting up visibly with an on-screen alert, until I press Next. Intervals never start by themselves. The display blanks when nothing is happening, or when Overtime has run unattended for a long time, to protect the OLED from burn-in. Blanking never stops or caps the timer.
 
 ## User Stories
 
@@ -51,7 +51,7 @@ A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two button
 
 25. As a user, I want the screen to flash, alternating inverted and normal, for about 10 seconds when an Interval enters Overtime, so that I notice the planned time is up.
 26. As a user, I want the flash to settle into a steady inverted screen afterwards, so that the alert stays noticeable without being a strobe.
-27. As a user, I want the steady inverted screen to remain for as long as Overtime is Running, so that a glance always tells me I'm over.
+27. As a user, I want the steady inverted screen to remain while Overtime is Running (until long-Overtime blanking, story 41), so that a glance always tells me I'm over.
 28. As a user, I want pausing to drop all alert styling, so that a Paused screen looks the same in every situation.
 29. As a user, I want resuming an Interval in Overtime to show the steady inverted screen rather than restarting the flash, so that resuming isn't jarring.
 30. As a user, I want pausing during the 10-second flash to end the flash, so that the flash happens once per Interval.
@@ -71,7 +71,7 @@ A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two button
 
 39. As a user, I want the display to blank after 5 minutes continuously in Ready, so that the OLED doesn't burn in while I'm away.
 40. As a user, I want the display to blank after 5 minutes continuously in Paused, including Paused in Overtime, so that a forgotten pause doesn't burn in the screen.
-41. As a user, I want the display never to blank while Running, including Overtime, so that I never lose sight of an active Interval.
+41. As a user, I want the display never to blank while Running before Overtime, and to blank only after 30 minutes continuously Running in Overtime, while the Interval keeps accruing, so that an active Interval is always visible but an Interval I've walked away from can't burn in the screen, and waking it shows how long I was really gone.
 42. As a user, I want the first press of either button while blanked only to wake the display, so that waking it can't accidentally start, pause or skip anything.
 43. As a user, I want the 5-minute blanking timer to restart whenever I press a button, so that the screen only blanks when I've genuinely left it alone.
 
@@ -119,8 +119,9 @@ A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two button
   - resuming in Overtime giving steady-inverted
   - Next ending alerts
   - 5-minute blanking in Ready or Paused, reset by any press
+  - long-Overtime blanking after 30 minutes continuously Running in Overtime, counted from entering Overtime and restarted on resume; the Interval keeps accruing, and Overtime is never capped
   - a press while blanked only waking the display
-- Durations (Focus 25 min, Break 5 min), the flash window (~10 s) and the blanking delay (5 min) are named constants.
+- Durations (Focus 25 min, Break 5 min), the flash window (~10 s), the idle blanking delay (5 min) and the long-Overtime blanking delay (30 min) are named constants.
 
 **Hardware layer** (thin, with no decisions).
 
@@ -165,7 +166,8 @@ A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two button
   - flash phases during the window, then steady-inverted
   - pausing mid-flash, then resuming (steady-inverted)
   - Next during an alert
-  - blanking after 5 minutes in Ready and in Paused, never while Running
+  - blanking after 5 minutes in Ready and in Paused, never while Running before Overtime
+  - long-Overtime blanking at 30 minutes of continuous Running in Overtime, restarted by pause and resume, with Overtime still accruing and shown correctly on wake
   - the blanking timer restarting on a press
   - a wake press being swallowed
   - irregular tick spacing producing correct times
@@ -191,5 +193,5 @@ Listed roughly in priority order where known. Each becomes its own spec or ticke
 ## Further Notes
 
 - The ESP32-C3 can only wake from deep sleep on GPIO0–5. When battery support arrives, the wake button should sit on one of those pins so the C3 port stays easy.
-- In Overtime the inverted screen stays on indefinitely while Running. That's accepted for the MVP, since Overtime is expected to last minutes, not hours.
+- Overtime is deliberately blanked, not capped. Capping would end the Interval without the user and make its recorded length wrong for future Interval logging. Burn-in is a display concern, so it's solved in the display rules.
 - The header has room on its right-hand side for the Focus count later without reworking the layout.

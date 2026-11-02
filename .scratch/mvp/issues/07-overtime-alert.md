@@ -12,5 +12,6 @@
 - [ ] Paused (anywhere) has no alert styling
 - [ ] Pausing mid-flash then resuming gives steady-inverted
 - [ ] Next during any alert → Ready next type with no alert styling
+- [ ] Reaching the Overtime limit during an alert → Ready next type with no alert styling
 - [ ] Flash window length is a named constant
 - [ ] Hardware layer inverts the display according to the styling; verified by hand that the flash is noticeable but not a strobe

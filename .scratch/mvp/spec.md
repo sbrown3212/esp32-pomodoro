@@ -10,7 +10,7 @@ I want a dedicated, physical Pomodoro timer on my desk. Phone and computer timer
 
 ## Solution
 
-A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two buttons, powered over USB, with no connectivity. It alternates 25-minute Focus and 5-minute Break Intervals. **Primary** always starts or stops the clock; **Next** always ends the current Interval and readies the next type. When an Interval reaches its planned duration it continues into Overtime, counting up visibly with an on-screen alert, until I press Next. Intervals never start by themselves. The display blanks when nothing is happening, or when Overtime has run unattended for a long time, to protect the OLED from burn-in. Blanking never stops or caps the timer.
+A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two buttons, powered over USB, with no connectivity. It alternates 25-minute Focus and 5-minute Break Intervals. **Primary** always starts or stops the clock; **Next** always ends the current Interval and readies the next type. When an Interval reaches its planned duration it continues into Overtime, counting up visibly with an on-screen alert, until I press Next. If I've forgotten it and Overtime reaches 60 minutes (the Overtime limit), the Interval ends by itself and the next type becomes Ready. Intervals never start by themselves. The display blanks when nothing is happening, to protect the OLED from burn-in.
 
 ## User Stories
 
@@ -40,7 +40,7 @@ A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two button
 
 17. As a user, I want a Running Interval that reaches its planned duration to continue into Overtime instead of ending, so that I can finish my thought without the device deciding for me.
 18. As a user, I want Overtime time to keep accruing to the Interval, so that the Interval's true length is what I actually spent.
-19. As a user, I want Overtime to end only when I press Next, so that I decide when the Interval is over.
+19. As a user, I want Overtime to end when I press Next, or automatically when it reaches the Overtime limit of 60 minutes (leaving the next Interval type Ready), so that I decide when I'm done, a forgotten timer doesn't run forever, and I'm nudged to take a break instead of sitting for hours.
 20. As a user, I want Overtime shown as `+mm:ss` counting up with an `OVER` tag, so that I never mistake "two minutes over" for "two minutes left".
 21. As a user, I want a countdown never to carry a sign, so that a `+` always and only means Overtime.
 22. As a user, I want the progress bar to be full during Overtime, so that I have a second cue that the planned time is used up.
@@ -51,7 +51,7 @@ A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two button
 
 25. As a user, I want the screen to flash, alternating inverted and normal, for about 10 seconds when an Interval enters Overtime, so that I notice the planned time is up.
 26. As a user, I want the flash to settle into a steady inverted screen afterwards, so that the alert stays noticeable without being a strobe.
-27. As a user, I want the steady inverted screen to remain while Overtime is Running (until long-Overtime blanking, story 41), so that a glance always tells me I'm over.
+27. As a user, I want the steady inverted screen to remain while Overtime is Running, so that a glance always tells me I'm over.
 28. As a user, I want pausing to drop all alert styling, so that a Paused screen looks the same in every situation.
 29. As a user, I want resuming an Interval in Overtime to show the steady inverted screen rather than restarting the flash, so that resuming isn't jarring.
 30. As a user, I want pausing during the 10-second flash to end the flash, so that the flash happens once per Interval.
@@ -71,7 +71,7 @@ A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two button
 
 39. As a user, I want the display to blank after 5 minutes continuously in Ready, so that the OLED doesn't burn in while I'm away.
 40. As a user, I want the display to blank after 5 minutes continuously in Paused, including Paused in Overtime, so that a forgotten pause doesn't burn in the screen.
-41. As a user, I want the display never to blank while Running before Overtime, and to blank only after 30 minutes continuously Running in Overtime, while the Interval keeps accruing, so that an active Interval is always visible but an Interval I've walked away from can't burn in the screen, and waking it shows how long I was really gone.
+41. As a user, I want the display never to blank while Running, including Overtime, so that I never lose sight of an active Interval (the Overtime limit bounds how long that can last).
 42. As a user, I want the first press of either button while blanked only to wake the display, so that waking it can't accidentally start, pause or skip anything.
 43. As a user, I want the 5-minute blanking timer to restart whenever I press a button, so that the screen only blanks when I've genuinely left it alone.
 
@@ -101,7 +101,7 @@ A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two button
 
 **Timer logic** (the deep module; holds all behaviour). Pure C++, with no dependency on Arduino, the display, GPIO or a clock.
 
-- Inputs: *Primary pressed*, *Next pressed* and *tick*. Each one carries the current monotonic time in milliseconds, so the module never reads a clock itself. Tick is called frequently so time-driven changes (entering Overtime, the flash ending, blanking) happen with no press.
+- Inputs: *Primary pressed*, *Next pressed* and *tick*. Each one carries the current monotonic time as a 64-bit millisecond timestamp, so the module never reads a clock itself and timestamps never roll over. Tick is called frequently so time-driven changes (entering Overtime, the flash ending, reaching the Overtime limit, blanking) happen with no press.
 - Output: a snapshot describing what should be shown:
   - Interval type: Focus or Break
   - run state: Ready, Running or Paused
@@ -119,13 +119,13 @@ A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two button
   - resuming in Overtime giving steady-inverted
   - Next ending alerts
   - 5-minute blanking in Ready or Paused, reset by any press
-  - long-Overtime blanking after 30 minutes continuously Running in Overtime, counted from entering Overtime and restarted on resume; the Interval keeps accruing, and Overtime is never capped
+  - the Overtime limit: when accrued Overtime (excluding paused time) reaches 60 minutes, the Interval ends exactly as if Next were pressed, giving the next Interval type Ready with no alert styling; this applies to Focus and Break alike
   - a press while blanked only waking the display
-- Durations (Focus 25 min, Break 5 min), the flash window (~10 s), the idle blanking delay (5 min) and the long-Overtime blanking delay (30 min) are named constants.
+- Durations (Focus 25 min, Break 5 min), the flash window (~10 s), the blanking delay (5 min) and the Overtime limit (60 min) are named constants.
 
 **Hardware layer** (thin, with no decisions).
 
-- It debounces both buttons with a library and turns presses into *Primary pressed* / *Next pressed* calls carrying `millis()`.
+- It debounces both buttons with a library and turns presses into *Primary pressed* / *Next pressed* calls carrying the current time, taken from the ESP32's 64-bit clock (not the 32-bit `millis()`, which wraps after ~49.7 days of uptime).
 - It calls *tick* every loop iteration.
 - It renders the snapshot with U8g2:
   - header row with the Interval type on the left and the run state on the right
@@ -149,7 +149,7 @@ A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two button
 
 ### Time
 
-- Elapsed time is measured from monotonic millisecond timestamps, accumulated across pauses. It is not counted in ticks, so missed or irregular ticks never cause drift.
+- Elapsed time is measured from monotonic 64-bit millisecond timestamps, accumulated across pauses. It is not counted in ticks, so missed or irregular ticks never cause drift.
 - Displayed seconds round consistently, so the countdown shows 25:00 at start and Overtime begins exactly at the planned duration.
 
 ## Testing Decisions
@@ -167,7 +167,8 @@ A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two button
   - pausing mid-flash, then resuming (steady-inverted)
   - Next during an alert
   - blanking after 5 minutes in Ready and in Paused, never while Running before Overtime
-  - long-Overtime blanking at 30 minutes of continuous Running in Overtime, restarted by pause and resume, with Overtime still accruing and shown correctly on wake
+  - the Overtime limit: reaching exactly 60 minutes of Overtime gives the next type Ready, paused time doesn't count toward it, and it works for Focus and Break
+  - large timestamps (as after weeks of uptime) still give correct times
   - the blanking timer restarting on a press
   - a wake press being swallowed
   - irregular tick spacing producing correct times
@@ -181,7 +182,8 @@ Listed roughly in priority order where known. Each becomes its own spec or ticke
 
 - **Long Break and Cycle**: a Long Break after every 4th Focus. Adds *Cycle* and *Long Break* to the glossary and renames Break to *Short Break*.
 - **Focus count**: completed Focus Intervals since power-on, shown in the header. A Focus counts as completed once it reaches its planned duration, whatever is pressed afterwards.
-- **Interval logging**: recording each Interval's actual length, including Overtime.
+- **Interval logging**: recording each Interval's actual length, including Overtime. Must decide how to record an Interval ended by the Overtime limit, whose true end is unknown.
+- **Escalating alerts**: e.g. a further alert as the Overtime limit approaches or is reached, likely paired with the buzzer.
 - **Flowtime-style mode**: Focus counts up from zero with no planned length, and the Break is sized from the Focus length.
 - **On-device duration settings.**
 - **Button layout experiments**: a Reset action, a third button, long-press / double-press / hold-to-repeat gestures (e.g. for settings menus), hold-to-confirm against accidental presses.
@@ -193,5 +195,6 @@ Listed roughly in priority order where known. Each becomes its own spec or ticke
 ## Further Notes
 
 - The ESP32-C3 can only wake from deep sleep on GPIO0–5. When battery support arrives, the wake button should sit on one of those pins so the C3 port stays easy.
-- Overtime is deliberately blanked, not capped. Capping would end the Interval without the user and make its recorded length wrong for future Interval logging. Burn-in is a display concern, so it's solved in the display rules.
+- The Overtime limit exists because 60 minutes of Overtime almost always means the timer was forgotten, and because the device's purpose is to make me take breaks. It also bounds burn-in: the inverted Overtime screen lasts at most 60 minutes, after which the device is Ready and the normal 5-minute blanking applies. That's why there is no separate Overtime blanking rule. Because Overtime never exceeds 60:00, `+mm:ss` is always enough.
+- An earlier revision blanked the display after 30 minutes of Overtime instead of limiting Overtime; it was replaced by the Overtime limit.
 - The header has room on its right-hand side for the Focus count later without reworking the layout.

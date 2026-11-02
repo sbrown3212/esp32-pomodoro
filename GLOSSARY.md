@@ -34,8 +34,12 @@ The current Interval is halted partway through, keeping its elapsed time.
 _Avoid_: Stopped
 
 **Overtime**:
-The part of an Interval after its planned duration has elapsed. The Interval is still in progress, Running or Paused, and its time keeps accruing until the user ends it.
+The part of an Interval after its planned duration has elapsed. The Interval is still in progress, Running or Paused, and its time keeps accruing until the user ends it or it reaches the Overtime limit.
 _Avoid_: Expired, finished, done
+
+**Overtime limit**:
+The most Overtime an Interval can accrue before it ends automatically, as if Next were pressed.
+_Avoid_: Cap, timeout
 
 ## Actions
 

@@ -4,7 +4,7 @@ A desktop Pomodoro timer on an ESP32 DevKit V1 with a 128×64 OLED and two butto
 
 ## Setup
 
-Install [PlatformIO Core](https://docs.platformio.org/en/latest/core/), for example with `uv tool install --python 3.13 platformio`.
+Install [PlatformIO Core](https://docs.platformio.org/en/latest/core/), for example with `uv tool install platformio`.
 
 ## Commands
 

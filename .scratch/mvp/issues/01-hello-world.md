@@ -4,13 +4,17 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** ready-for-human
 
-- [ ] PlatformIO project with the Arduino framework and two environments: the ESP32 DevKit V1 board, and native (host)
-- [ ] The native environment runs a placeholder Unity test that passes, with no board attached
+- [x] PlatformIO project with the Arduino framework and two environments: the ESP32 DevKit V1 board, and native (host)
+- [x] The native environment runs a placeholder Unity test that passes, with no board attached
 - [ ] Firmware builds and uploads to the DevKit V1
 - [ ] The SSD1306 128×64 (I2C, SDA GPIO21 / SCL GPIO22) shows a hello message, rendered with U8g2
 - [ ] Primary (GPIO25) and Next (GPIO26) are wired to GND with internal pull-ups and debounced via a button library
 - [ ] The screen shows a separate press count for Primary and Next; one physical press increments its count by exactly one (checked by hand, including rapid presses)
-- [ ] All pin assignments are defined in a single place
-- [ ] Short note in the repo on how to build, upload and run the tests
+- [x] All pin assignments are defined in a single place
+- [x] Short note in the repo on how to build, upload and run the tests
+
+## Comments
+
+Firmware is written and builds, but has not run on hardware: no board was attached. The unticked items need checking on the device: upload, the hello message, and the press counts, including rapid presses. Include very short taps alternating between the two buttons: buttons aren't read during a redraw (estimated at about 30 ms, not measured), so a tap that fits entirely inside one could be missed. Also watch for double counts, which would mean a switch bounces for longer than the 10 ms debounce.

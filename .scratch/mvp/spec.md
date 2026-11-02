@@ -134,6 +134,8 @@ A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two button
   - inversion according to the alert styling
   - a blank screen when the snapshot says it's blanked
 - It redraws only when the snapshot changes, to avoid flicker.
+- It sets the display contrast to a reduced level, a named constant tuned by eye on the device, because OLED wear rises steeply with brightness.
+- The layout leaves a margin of a couple of pixels on every side, so pixel shifting can be added later without a redesign.
 
 ### Button behaviour
 
@@ -188,6 +190,7 @@ Listed roughly in priority order where known. Each becomes its own spec or ticke
 - **On-device duration settings.**
 - **Button layout experiments**: a Reset action, a third button, long-press / double-press / hold-to-repeat gestures (e.g. for settings menus), hold-to-confirm against accidental presses.
 - **Buzzer alert.**
+- **Pixel shifting**: periodically shift the whole layout by a pixel or two (e.g. each new Interval) to spread burn-in from static elements such as the header text and the colon. Needs a decision on whether the timer logic or the hardware layer chooses the offset.
 - **Battery power and deep sleep.**
 - **ESP32-C3 port.**
 - **Wi-Fi / Bluetooth connectivity.**

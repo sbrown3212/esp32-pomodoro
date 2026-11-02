@@ -15,5 +15,7 @@
 - [ ] Displayed seconds start at 25:00 and round consistently
 - [ ] Focus and Break durations are named constants in one place
 - [ ] The hello-world screen is replaced by a header row (Interval type on the left, run state on the right) and large `mm:ss` digits
+- [ ] The layout leaves a margin of a couple of pixels on every side (room for future pixel shifting)
+- [ ] Display contrast is set to a reduced level via a named constant, tuned by eye for comfortable reading at desk distance
 - [ ] The display is redrawn only when the snapshot changes; no visible flicker (checked by hand)
 - [ ] Next is accepted by the interface but its behaviour is left to ticket 04

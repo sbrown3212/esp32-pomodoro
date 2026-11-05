@@ -63,9 +63,11 @@ void draw(const Snapshot &snapshot) {
   char timeText[12];
   snprintf(timeText, sizeof(timeText), "%02lu:%02lu", static_cast<unsigned long>(snapshot.secondsToShow / 60),
            static_cast<unsigned long>(snapshot.secondsToShow % 60));
-  // Every digit in this font has the same width, so centring doesn't shift the time as it counts.
+  // Centre on a fixed "00:00", not the actual text. Every digit in this font advances the same
+  // distance, but getStrWidth() measures the first and last glyphs by their visible pixels, so
+  // a leading or trailing '1' would change the width and shift the time as it counts.
   display.setFont(u8g2_font_logisoso28_tn);
-  display.drawStr((display.getDisplayWidth() - display.getStrWidth(timeText)) / 2, TIME_BASELINE_Y, timeText);
+  display.drawStr((display.getDisplayWidth() - display.getStrWidth("00:00")) / 2, TIME_BASELINE_Y, timeText);
 
   display.sendBuffer();
 }

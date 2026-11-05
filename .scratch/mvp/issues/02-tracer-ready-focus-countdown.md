@@ -4,7 +4,7 @@
 
 **Blocked by:** 01
 
-**Status:** needs-device-check
+**Status:** resolved
 
 - [x] Timer logic is pure C++ with no Arduino, display, GPIO or clock dependency, and is developed test-first in the native environment
 - [x] Snapshot exposes at least: Interval type, run state, time to show in whole seconds
@@ -14,10 +14,10 @@
 - [x] Timestamps are 64-bit milliseconds; the hardware layer takes them from the ESP32's 64-bit clock, not the 32-bit `millis()`; a test with large timestamps (weeks of uptime) gives correct times
 - [x] Displayed seconds start at 25:00 and round consistently
 - [x] Focus and Break durations are named constants in one place
-- [ ] The hello-world screen is replaced by a header row (Interval type on the left, run state on the right) and large `mm:ss` digits
-- [ ] The layout leaves a margin of a couple of pixels on every side (room for future pixel shifting)
-- [ ] Display contrast is set to a reduced level via a named constant, tuned by eye for comfortable reading at desk distance
-- [ ] The display is redrawn only when the snapshot changes; no visible flicker (checked by hand)
+- [x] The hello-world screen is replaced by a header row (Interval type on the left, run state on the right) and large `mm:ss` digits
+- [x] The layout leaves a margin of a couple of pixels on every side (room for future pixel shifting)
+- [x] Display contrast is set to a reduced level via a named constant, tuned by eye for comfortable reading at desk distance
+- [x] The display is redrawn only when the snapshot changes; no visible flicker (checked by hand)
 - [x] Next is accepted by the interface but its behaviour is left to ticket 04
 
 ## Comments
@@ -29,3 +29,5 @@ Timer logic is done and tested, and the firmware builds, but it has not run on h
 - Contrast: `DISPLAY_CONTRAST` is 64, an untuned starting value (U8g2's default is 207). Please tune it by eye.
 - Flicker: please watch the countdown. It redraws only when the snapshot changes, about once a second, and buttons aren't read during a redraw.
 - Past 25:00 the countdown stays at 00:00 and `RUNNING`, Primary does nothing while Running, and Next does nothing. These are placeholders until tickets 06, 03 and 04, which will need to replace the tests that pin them.
+
+All checks passed on the device: the layout and margins, the readability of the digits at desk distance, the contrast, and the countdown with no visible flicker. `DISPLAY_CONTRAST` stays at 64.

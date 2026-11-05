@@ -9,6 +9,9 @@ Issues and specs for this repo live as markdown files in `.scratch/`.
 - Implementation issues are one file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`, never a single combined tickets file
 - Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
+- Once implemented, a ticket's `Status:` moves through two more values:
+  - `needs-device-check`: code is committed, and only hand checks on the device remain.
+  - `resolved`: every checklist item is confirmed. Leave device items unticked until a human confirms them.
 
 ## When a skill says "publish to the issue tracker"
 

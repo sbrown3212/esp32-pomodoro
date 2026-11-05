@@ -12,3 +12,7 @@
 - [ ] Header shows `PAUSED` while Paused
 - [ ] Tests cover pausing and resuming in a Focus (Break is covered once ticket 04 introduces it)
 - [ ] Verified by hand on the device
+
+## Comments
+
+Ticket 02 added `test_primary_while_running_does_not_restart_the_countdown`, which pins Primary doing nothing while Running. Pausing replaces that behaviour, so rewrite the test as a pause test rather than keeping it passing.

@@ -15,3 +15,7 @@
 - [ ] The Overtime limit is a named constant
 - [ ] Tested for both Focus and Break, including the exact boundary
 - [ ] Rendered on the device as `+mm:ss` with `OVER`; verified by hand (shorten durations temporarily if useful, but commit the real constants)
+
+## Comments
+
+Ticket 02 added `test_countdown_stops_at_zero_at_and_after_the_planned_duration`, which pins the countdown stopping at 00:00. Overtime replaces that behaviour, so rewrite the test for entering Overtime rather than keeping it passing. Also, `draw()` centres the time on the width of a fixed `00:00`, so `+mm:ss` will need its own fixed centring width.

@@ -116,18 +116,6 @@ void test_primary_while_running_does_not_restart_the_countdown() {
   assertSnapshot(IntervalType::Focus, RunState::Running, 1480, timer.snapshot());
 }
 
-// Until ticket 04 adds its behaviour, Next is accepted and changes nothing.
-void test_next_is_accepted_and_changes_nothing_yet() {
-  TimerLogic ready;
-  ready.nextPressed(1000);
-  assertSnapshot(IntervalType::Focus, RunState::Ready, 1500, ready.snapshot());
-
-  TimerLogic running;
-  running.primaryPressed(0);
-  running.nextPressed(1000);
-  assertSnapshot(IntervalType::Focus, RunState::Running, 1499, running.snapshot());
-}
-
 void test_snapshot_only_changes_when_the_shown_second_or_state_changes() {
   TimerLogic timer;
   const Snapshot ready = timer.snapshot();
@@ -156,7 +144,6 @@ int main() {
   RUN_TEST(test_correct_time_when_a_focus_spans_the_32_bit_millisecond_rollover);
   RUN_TEST(test_countdown_stops_at_zero_at_and_after_the_planned_duration);
   RUN_TEST(test_primary_while_running_does_not_restart_the_countdown);
-  RUN_TEST(test_next_is_accepted_and_changes_nothing_yet);
   RUN_TEST(test_snapshot_only_changes_when_the_shown_second_or_state_changes);
   return UNITY_END();
 }

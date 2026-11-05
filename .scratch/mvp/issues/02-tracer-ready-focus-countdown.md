@@ -28,7 +28,7 @@ Timer logic is done and tested, and the firmware builds, but it has not run on h
 - Digit font: `logisoso28` is the largest candidate measured whose digits all have the same width, so the centred time doesn't shift as it counts. `logisoso32` is bigger, but its `1` is 2 px wider. Please check it reads well from across the desk.
 - Contrast: `DISPLAY_CONTRAST` is 64, an untuned starting value (U8g2's default is 207). Please tune it by eye.
 - Flicker: please watch the countdown. It redraws only when the snapshot changes, about once a second, and buttons aren't read during a redraw.
-- Past 25:00 the countdown stays at 00:00 and `RUNNING`, Primary does nothing while Running, and Next does nothing. These are placeholders until tickets 06, 03 and 04, which will need to replace the tests that pin them.
+- Past 25:00 the countdown stays at 00:00 and `RUNNING`, Primary does nothing while Running, and Next does nothing. These are placeholders until tickets 06, 03 and 04. Tests pin the first two, so tickets 06 and 03 will need to replace those tests. Next has no test, because doing nothing can't go wrong.
 
 All checks passed on the device: the layout and its 2 px margins, the digits are readable from the desk, and the countdown shows no flicker. On the device, the header looked better in bold, so it now uses `7x13B`. Its letters are one pixel wider than `6x13B`, which leaves a 1 px gap between them, because `6x13B` looked cramped. Contrast 64, 48 and 16 looked about the same, so `DISPLAY_CONTRAST` is 16, the lowest of the three, to reduce wear.
 

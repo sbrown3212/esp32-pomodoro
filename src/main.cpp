@@ -11,7 +11,8 @@ namespace {
 constexpr uint16_t DEBOUNCE_MS = 10;
 
 // Below U8g2's SSD1306 default of 207, because OLED wear rises steeply with brightness.
-constexpr uint8_t DISPLAY_CONTRAST = 64;
+// Tuned by eye on the device: 64, 48 and 16 looked about the same, so the lowest was kept.
+constexpr uint8_t DISPLAY_CONTRAST = 16;
 
 constexpr int MARGIN_PX = 2;
 constexpr int HEADER_BASELINE_Y = 11;
@@ -54,7 +55,7 @@ const char *runStateLabel(RunState state) {
 void draw(const Snapshot &snapshot) {
   display.clearBuffer();
 
-  display.setFont(u8g2_font_6x13_tr);
+  display.setFont(u8g2_font_7x13B_tr);
   display.drawStr(MARGIN_PX, HEADER_BASELINE_Y, intervalTypeLabel(snapshot.intervalType));
   const char *runState = runStateLabel(snapshot.runState);
   display.drawStr(display.getDisplayWidth() - MARGIN_PX - display.getStrWidth(runState), HEADER_BASELINE_Y, runState);

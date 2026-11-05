@@ -59,15 +59,14 @@ void draw(const Snapshot &snapshot) {
   const char *runState = runStateLabel(snapshot.runState);
   display.drawStr(display.getDisplayWidth() - MARGIN_PX - display.getStrWidth(runState), HEADER_BASELINE_Y, runState);
 
-  char time[12];
-  snprintf(time, sizeof(time), "%02lu:%02lu", static_cast<unsigned long>(snapshot.secondsToShow / 60),
+  char timeText[12];
+  snprintf(timeText, sizeof(timeText), "%02lu:%02lu", static_cast<unsigned long>(snapshot.secondsToShow / 60),
            static_cast<unsigned long>(snapshot.secondsToShow % 60));
   // Every digit in this font has the same width, so centring doesn't shift the time as it counts.
   display.setFont(u8g2_font_logisoso28_tn);
-  display.drawStr((display.getDisplayWidth() - display.getStrWidth(time)) / 2, TIME_BASELINE_Y, time);
+  display.drawStr((display.getDisplayWidth() - display.getStrWidth(timeText)) / 2, TIME_BASELINE_Y, timeText);
 
   display.sendBuffer();
-  drawnSnapshot = snapshot;
 }
 
 }  // namespace
@@ -78,7 +77,8 @@ void setup() {
 
   display.begin();
   display.setContrast(DISPLAY_CONTRAST);
-  draw(timer.snapshot());
+  drawnSnapshot = timer.snapshot();
+  draw(drawnSnapshot);
 }
 
 void loop() {
@@ -98,5 +98,6 @@ void loop() {
   const Snapshot snapshot = timer.snapshot();
   if (snapshot != drawnSnapshot) {
     draw(snapshot);
+    drawnSnapshot = snapshot;
   }
 }

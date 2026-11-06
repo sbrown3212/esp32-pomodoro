@@ -2,12 +2,12 @@
 
 void TimerLogic::primaryPressed(uint64_t nowMs) {
   nowMs_ = nowMs;
-  if (runState_ == RunState::Ready) {
-    runState_ = RunState::Running;
-    startedAtMs_ = nowMs;
-  } else if (runState_ == RunState::Running) {
+  if (runState_ == RunState::Running) {
     runState_ = RunState::Paused;
     elapsedBeforeRunMs_ += nowMs - startedAtMs_;
+  } else {
+    runState_ = RunState::Running;
+    startedAtMs_ = nowMs;
   }
 }
 

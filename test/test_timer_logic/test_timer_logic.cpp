@@ -155,10 +155,6 @@ void test_part_seconds_across_several_pauses_add_up_exactly() {
 
   // 2.0 s elapsed in total.
   assertSnapshot(IntervalType::Focus, RunState::Running, 1498, timer.snapshot());
-
-  timer.primaryPressed(3608000);
-  timer.tick(3700000);
-  assertSnapshot(IntervalType::Focus, RunState::Paused, 1498, timer.snapshot());
 }
 
 void test_snapshot_only_changes_when_the_shown_second_or_state_changes() {

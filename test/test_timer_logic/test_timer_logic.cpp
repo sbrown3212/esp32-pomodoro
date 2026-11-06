@@ -142,6 +142,25 @@ void test_primary_while_paused_resumes_from_where_it_stopped() {
   assertSnapshot(IntervalType::Focus, RunState::Running, 1485, timer.snapshot());
 }
 
+void test_part_seconds_across_several_pauses_add_up_exactly() {
+  TimerLogic timer;
+
+  // Runs of 0.4 s, 0.7 s and 0.9 s, split by pauses of very different lengths.
+  timer.primaryPressed(1000);
+  timer.primaryPressed(1400);
+  timer.primaryPressed(6400);
+  timer.primaryPressed(7100);
+  timer.primaryPressed(3607100);
+  timer.tick(3608000);
+
+  // 2.0 s elapsed in total.
+  assertSnapshot(IntervalType::Focus, RunState::Running, 1498, timer.snapshot());
+
+  timer.primaryPressed(3608000);
+  timer.tick(3700000);
+  assertSnapshot(IntervalType::Focus, RunState::Paused, 1498, timer.snapshot());
+}
+
 void test_snapshot_only_changes_when_the_shown_second_or_state_changes() {
   TimerLogic timer;
   const Snapshot ready = timer.snapshot();
@@ -172,6 +191,7 @@ int main() {
   RUN_TEST(test_primary_while_running_pauses_the_focus);
   RUN_TEST(test_time_shown_does_not_change_while_paused);
   RUN_TEST(test_primary_while_paused_resumes_from_where_it_stopped);
+  RUN_TEST(test_part_seconds_across_several_pauses_add_up_exactly);
   RUN_TEST(test_snapshot_only_changes_when_the_shown_second_or_state_changes);
   return UNITY_END();
 }

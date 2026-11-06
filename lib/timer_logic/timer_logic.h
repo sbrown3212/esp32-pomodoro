@@ -32,6 +32,9 @@ class TimerLogic {
 
  private:
   RunState runState_ = RunState::Ready;
+  // Elapsed time banked by earlier runs, before the current one started.
+  uint64_t elapsedBeforeRunMs_ = 0;
+  // When the current run started; only meaningful while Running.
   uint64_t startedAtMs_ = 0;
   uint64_t nowMs_ = 0;
 };

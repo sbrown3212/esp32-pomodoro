@@ -104,16 +104,14 @@ void test_countdown_stops_at_zero_at_and_after_the_planned_duration() {
   assertSnapshot(IntervalType::Focus, RunState::Running, 0, timer.snapshot());
 }
 
-// Until ticket 03 adds pausing, a further Primary must not restart the countdown.
-void test_primary_while_running_does_not_restart_the_countdown() {
+void test_primary_while_running_pauses_the_focus() {
   TimerLogic timer;
   timer.primaryPressed(0);
   timer.tick(10000);
 
   timer.primaryPressed(10000);
-  timer.tick(20000);
 
-  assertSnapshot(IntervalType::Focus, RunState::Running, 1480, timer.snapshot());
+  assertSnapshot(IntervalType::Focus, RunState::Paused, 1490, timer.snapshot());
 }
 
 void test_snapshot_only_changes_when_the_shown_second_or_state_changes() {
@@ -143,7 +141,7 @@ int main() {
   RUN_TEST(test_correct_time_after_weeks_of_uptime);
   RUN_TEST(test_correct_time_when_a_focus_spans_the_32_bit_millisecond_rollover);
   RUN_TEST(test_countdown_stops_at_zero_at_and_after_the_planned_duration);
-  RUN_TEST(test_primary_while_running_does_not_restart_the_countdown);
+  RUN_TEST(test_primary_while_running_pauses_the_focus);
   RUN_TEST(test_snapshot_only_changes_when_the_shown_second_or_state_changes);
   return UNITY_END();
 }

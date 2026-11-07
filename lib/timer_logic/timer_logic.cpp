@@ -2,9 +2,16 @@
 
 void TimerLogic::primaryPressed(uint64_t nowMs) {
   nowMs_ = nowMs;
-  if (runState_ == RunState::Ready) {
-    runState_ = RunState::Running;
-    startedAtMs_ = nowMs;
+  switch (runState_) {
+    case RunState::Ready:
+    case RunState::Paused:
+      runState_ = RunState::Running;
+      runningSinceMs_ = nowMs;
+      break;
+    case RunState::Running:
+      runState_ = RunState::Paused;
+      elapsedAtLastPauseMs_ += nowMs - runningSinceMs_;
+      break;
   }
 }
 
@@ -17,7 +24,8 @@ void TimerLogic::tick(uint64_t nowMs) {
 }
 
 Snapshot TimerLogic::snapshot() const {
-  const uint64_t elapsedMs = runState_ == RunState::Running ? nowMs_ - startedAtMs_ : 0;
+  const uint64_t elapsedMs =
+      elapsedAtLastPauseMs_ + (runState_ == RunState::Running ? nowMs_ - runningSinceMs_ : 0);
   const uint64_t remainingMs = elapsedMs < FOCUS_DURATION_MS ? FOCUS_DURATION_MS - elapsedMs : 0;
   // Rounding up shows 25:00 at the start, and 00:01 until the planned duration is reached.
   const uint64_t secondsToShow = (remainingMs + 999) / 1000;

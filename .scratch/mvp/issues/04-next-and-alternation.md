@@ -14,3 +14,7 @@
 - [ ] Pause and resume behave identically in a Break
 - [ ] Next button is wired through the hardware layer; header shows `BREAK` during a Break
 - [ ] Verified by hand: Focus → Next → Break → Next → Focus on the device
+
+## Comments
+
+Ticket 03 banks a paused Interval's elapsed time in the timer logic, and starting from Ready only works because that is zero at power-on. Next must clear it, or a fresh Ready Interval will start with the old Interval's elapsed time (story 15).

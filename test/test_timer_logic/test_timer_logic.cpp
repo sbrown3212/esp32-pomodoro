@@ -104,16 +104,57 @@ void test_countdown_stops_at_zero_at_and_after_the_planned_duration() {
   assertSnapshot(IntervalType::Focus, RunState::Running, 0, timer.snapshot());
 }
 
-// Until ticket 03 adds pausing, a further Primary must not restart the countdown.
-void test_primary_while_running_does_not_restart_the_countdown() {
+void test_primary_while_running_pauses_the_focus() {
   TimerLogic timer;
   timer.primaryPressed(0);
   timer.tick(10000);
 
   timer.primaryPressed(10000);
-  timer.tick(20000);
 
-  assertSnapshot(IntervalType::Focus, RunState::Running, 1480, timer.snapshot());
+  assertSnapshot(IntervalType::Focus, RunState::Paused, 1490, timer.snapshot());
+}
+
+void test_time_shown_does_not_change_while_paused() {
+  TimerLogic timer;
+  timer.primaryPressed(0);
+  timer.primaryPressed(10000);
+
+  timer.tick(10001);
+  assertSnapshot(IntervalType::Focus, RunState::Paused, 1490, timer.snapshot());
+
+  timer.tick(70000);
+  assertSnapshot(IntervalType::Focus, RunState::Paused, 1490, timer.snapshot());
+
+  // Far longer than the Focus itself.
+  timer.tick(10000000);
+  assertSnapshot(IntervalType::Focus, RunState::Paused, 1490, timer.snapshot());
+}
+
+void test_primary_while_paused_resumes_from_where_it_stopped() {
+  TimerLogic timer;
+  timer.primaryPressed(0);
+  timer.primaryPressed(10000);
+
+  timer.primaryPressed(70000);
+  assertSnapshot(IntervalType::Focus, RunState::Running, 1490, timer.snapshot());
+
+  timer.tick(75000);
+  assertSnapshot(IntervalType::Focus, RunState::Running, 1485, timer.snapshot());
+}
+
+void test_part_seconds_across_several_pauses_add_up_exactly() {
+  TimerLogic timer;
+
+  // Runs of 0.4 s, 0.7 s and 0.9 s, split by pauses of very different lengths.
+  timer.primaryPressed(1000);
+  timer.primaryPressed(1400);
+  timer.primaryPressed(6400);
+  timer.primaryPressed(7100);
+  timer.primaryPressed(3607100);
+  timer.tick(3608000);
+
+  // 2.0 s elapsed in total.
+  assertSnapshot(IntervalType::Focus, RunState::Running, 1498, timer.snapshot());
 }
 
 void test_snapshot_only_changes_when_the_shown_second_or_state_changes() {
@@ -143,7 +184,10 @@ int main() {
   RUN_TEST(test_correct_time_after_weeks_of_uptime);
   RUN_TEST(test_correct_time_when_a_focus_spans_the_32_bit_millisecond_rollover);
   RUN_TEST(test_countdown_stops_at_zero_at_and_after_the_planned_duration);
-  RUN_TEST(test_primary_while_running_does_not_restart_the_countdown);
+  RUN_TEST(test_primary_while_running_pauses_the_focus);
+  RUN_TEST(test_time_shown_does_not_change_while_paused);
+  RUN_TEST(test_primary_while_paused_resumes_from_where_it_stopped);
+  RUN_TEST(test_part_seconds_across_several_pauses_add_up_exactly);
   RUN_TEST(test_snapshot_only_changes_when_the_shown_second_or_state_changes);
   return UNITY_END();
 }

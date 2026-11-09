@@ -7,7 +7,9 @@
 #include <type_traits>
 
 // Exists only to give points in time their own type. It has no now(), so TimerLogic
-// can never read a clock: the hardware layer makes each point in time.
+// can never read a clock: the hardware layer makes each point in time. Leaving out now()
+// bends the standard's Clock requirements, but time_point never calls it.
+// Static_asserts in the timer logic tests check that the two types can't be mixed up.
 struct DeviceClock {
   // Named explicitly: std::chrono::milliseconds only promises at least 45 bits.
   using rep = uint64_t;

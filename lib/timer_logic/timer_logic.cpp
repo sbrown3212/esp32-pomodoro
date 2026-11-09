@@ -28,7 +28,7 @@ Snapshot TimerLogic::snapshot() const {
       elapsedAtLastPause_ + (runState_ == RunState::Running ? now_ - runningSince_ : Duration::zero());
   const Duration remaining = elapsed < FOCUS_DURATION ? FOCUS_DURATION - elapsed : Duration::zero();
   // Rounding up shows 25:00 at the start, and 00:01 until the planned duration is reached.
-  // Written out because std::chrono::ceil needs C++17.
+  // Written out because std::chrono::ceil needs C++17, and the native test build is C++14.
   const Duration oneSecond = std::chrono::seconds(1);
   const uint64_t secondsToShow = (remaining + oneSecond - Duration(1)) / oneSecond;
   return {IntervalType::Focus, runState_, static_cast<uint32_t>(secondsToShow)};

@@ -1,33 +1,35 @@
 #include "timer_logic.h"
 
-void TimerLogic::primaryPressed(uint64_t nowMs) {
-  nowMs_ = nowMs;
+void TimerLogic::primaryPressed(TimePoint now) {
+  now_ = now;
   switch (runState_) {
     case RunState::Ready:
     case RunState::Paused:
       runState_ = RunState::Running;
-      runningSinceMs_ = nowMs;
+      runningSince_ = now;
       break;
     case RunState::Running:
       runState_ = RunState::Paused;
-      elapsedAtLastPauseMs_ += nowMs - runningSinceMs_;
+      elapsedAtLastPause_ += now - runningSince_;
       break;
   }
 }
 
-void TimerLogic::nextPressed(uint64_t nowMs) {
-  nowMs_ = nowMs;
+void TimerLogic::nextPressed(TimePoint now) {
+  now_ = now;
 }
 
-void TimerLogic::tick(uint64_t nowMs) {
-  nowMs_ = nowMs;
+void TimerLogic::tick(TimePoint now) {
+  now_ = now;
 }
 
 Snapshot TimerLogic::snapshot() const {
-  const uint64_t elapsedMs =
-      elapsedAtLastPauseMs_ + (runState_ == RunState::Running ? nowMs_ - runningSinceMs_ : 0);
-  const uint64_t remainingMs = elapsedMs < FOCUS_DURATION_MS ? FOCUS_DURATION_MS - elapsedMs : 0;
+  const Duration elapsed =
+      elapsedAtLastPause_ + (runState_ == RunState::Running ? now_ - runningSince_ : Duration::zero());
+  const Duration remaining = elapsed < FOCUS_DURATION ? FOCUS_DURATION - elapsed : Duration::zero();
   // Rounding up shows 25:00 at the start, and 00:01 until the planned duration is reached.
-  const uint64_t secondsToShow = (remainingMs + 999) / 1000;
+  // Written out because std::chrono::ceil needs C++17.
+  const Duration oneSecond = std::chrono::seconds(1);
+  const uint64_t secondsToShow = (remaining + oneSecond - Duration(1)) / oneSecond;
   return {IntervalType::Focus, runState_, static_cast<uint32_t>(secondsToShow)};
 }

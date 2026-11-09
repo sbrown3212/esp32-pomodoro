@@ -3,6 +3,8 @@
 #include <U8g2lib.h>
 #include <esp_timer.h>
 
+#include <chrono>
+
 #include "pins.h"
 #include "timer_logic.h"
 
@@ -31,9 +33,10 @@ void setUpButton(Bounce2::Button &button, uint8_t pin) {
   button.setPressedState(LOW);
 }
 
-// esp_timer_get_time() is the 64-bit microsecond clock since boot.
-uint64_t nowMs() {
-  return static_cast<uint64_t>(esp_timer_get_time()) / 1000;
+// The one place a clock is read. esp_timer_get_time() is the 64-bit microsecond clock since boot.
+TimePoint deviceNow() {
+  const std::chrono::duration<int64_t, std::micro> sinceBoot(esp_timer_get_time());
+  return TimePoint(std::chrono::duration_cast<Duration>(sinceBoot));
 }
 
 const char *intervalTypeLabel(IntervalType type) {
@@ -85,7 +88,7 @@ void setup() {
 }
 
 void loop() {
-  const uint64_t now = nowMs();
+  const TimePoint now = deviceNow();
 
   primaryButton.update();
   nextButton.update();

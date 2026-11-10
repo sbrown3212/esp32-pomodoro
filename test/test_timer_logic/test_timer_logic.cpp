@@ -218,6 +218,20 @@ void test_next_from_a_running_focus_gives_a_ready_break_that_does_not_count_down
   assertSnapshot(IntervalType::Break, RunState::Ready, 300, timer.snapshot());
 }
 
+void test_next_from_a_paused_focus_gives_a_break_at_its_full_duration() {
+  TimerLogic timer;
+  timer.primaryPressed(atMs(0));
+  timer.primaryPressed(atMs(60000));
+
+  timer.nextPressed(atMs(70000));
+  assertSnapshot(IntervalType::Break, RunState::Ready, 300, timer.snapshot());
+
+  // The Focus's minute must not carry into the Break.
+  timer.primaryPressed(atMs(80000));
+  timer.tick(atMs(90000));
+  assertSnapshot(IntervalType::Break, RunState::Running, 290, timer.snapshot());
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_powers_on_as_a_ready_focus_at_25_00);
@@ -234,5 +248,6 @@ int main() {
   RUN_TEST(test_snapshot_only_changes_when_the_shown_second_or_state_changes);
   RUN_TEST(test_next_from_a_ready_focus_gives_a_ready_break_at_5_00);
   RUN_TEST(test_next_from_a_running_focus_gives_a_ready_break_that_does_not_count_down);
+  RUN_TEST(test_next_from_a_paused_focus_gives_a_break_at_its_full_duration);
   return UNITY_END();
 }

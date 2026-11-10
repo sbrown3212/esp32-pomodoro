@@ -18,7 +18,12 @@ constexpr uint8_t DISPLAY_CONTRAST = 16;
 
 constexpr int MARGIN_PX = 2;
 constexpr int HEADER_BASELINE_Y = 11;
-constexpr int TIME_BASELINE_Y = 48;
+// Digits sit on the row above their baseline, so 47 leaves an even 8 px gap to the header and to the bar.
+constexpr int TIME_BASELINE_Y = 47;
+// The bar sits on the bottom margin, leaving a gap of several pixels below the time digits.
+constexpr int PROGRESS_BAR_HEIGHT_PX = 7;
+// Between the bar's outline and its fill, so an empty bar and a nearly empty one look different.
+constexpr int PROGRESS_FILL_INSET_PX = 2;
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C display(U8G2_R0, U8X8_PIN_NONE, PIN_DISPLAY_SCL, PIN_DISPLAY_SDA);
 Bounce2::Button primaryButton;
@@ -71,6 +76,14 @@ void draw(const Snapshot &snapshot) {
   // a leading or trailing '1' would change the width and shift the time as it counts.
   display.setFont(u8g2_font_logisoso28_tn);
   display.drawStr((display.getDisplayWidth() - display.getStrWidth("00:00")) / 2, TIME_BASELINE_Y, timeText);
+
+  const int barWidth = display.getDisplayWidth() - 2 * MARGIN_PX;
+  const int barY = display.getDisplayHeight() - MARGIN_PX - PROGRESS_BAR_HEIGHT_PX;
+  display.drawFrame(MARGIN_PX, barY, barWidth, PROGRESS_BAR_HEIGHT_PX);
+  // A zero-width box draws nothing, so an empty bar needs no special case.
+  const int fillWidth = (barWidth - 2 * PROGRESS_FILL_INSET_PX) * snapshot.progressThousandths / 1000;
+  display.drawBox(MARGIN_PX + PROGRESS_FILL_INSET_PX, barY + PROGRESS_FILL_INSET_PX, fillWidth,
+                  PROGRESS_BAR_HEIGHT_PX - 2 * PROGRESS_FILL_INSET_PX);
 
   display.sendBuffer();
 }

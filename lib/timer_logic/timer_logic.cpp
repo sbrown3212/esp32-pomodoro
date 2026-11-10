@@ -35,5 +35,8 @@ Snapshot TimerLogic::snapshot() const {
   // Written out because std::chrono::ceil needs C++17, and the native test build is C++14.
   const Duration oneSecond = std::chrono::seconds(1);
   const uint64_t secondsToShow = (remaining + oneSecond - Duration(1)) / oneSecond;
-  return {intervalType_, runState_, static_cast<uint32_t>(secondsToShow)};
+  // Measured from the shown second, not the exact elapsed time, so the bar never moves between seconds.
+  const uint64_t plannedSeconds = planned / oneSecond;
+  const uint64_t progressThousandths = (plannedSeconds - secondsToShow) * 1000 / plannedSeconds;
+  return {intervalType_, runState_, static_cast<uint32_t>(secondsToShow), static_cast<uint16_t>(progressThousandths)};
 }

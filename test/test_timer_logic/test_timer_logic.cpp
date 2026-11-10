@@ -359,6 +359,84 @@ void test_a_full_focus_break_focus_loop_alternates_types() {
   assertSnapshot(IntervalType::Break, RunState::Ready, 300, timer.snapshot());
 }
 
+void test_progress_grows_while_a_focus_runs() {
+  TimerLogic timer;
+  timer.primaryPressed(atMs(0));
+
+  timer.tick(atMs(150000));
+  TEST_ASSERT_EQUAL_UINT16(100, timer.snapshot().progressThousandths);
+
+  timer.tick(atMs(750000));
+  TEST_ASSERT_EQUAL_UINT16(500, timer.snapshot().progressThousandths);
+}
+
+void test_progress_is_empty_in_ready_including_after_next() {
+  TimerLogic timer;
+  TEST_ASSERT_EQUAL_UINT16(0, timer.snapshot().progressThousandths);
+
+  timer.primaryPressed(atMs(0));
+  timer.tick(atMs(600000));
+  timer.nextPressed(atMs(600000));
+  TEST_ASSERT_EQUAL_UINT16(0, timer.snapshot().progressThousandths);
+
+  timer.nextPressed(atMs(601000));
+  TEST_ASSERT_EQUAL_UINT16(0, timer.snapshot().progressThousandths);
+}
+
+void test_progress_holds_still_while_paused() {
+  TimerLogic timer;
+  timer.primaryPressed(atMs(0));
+  timer.primaryPressed(atMs(300000));
+  TEST_ASSERT_EQUAL_UINT16(200, timer.snapshot().progressThousandths);
+
+  timer.tick(atMs(3600000));
+  TEST_ASSERT_EQUAL_UINT16(200, timer.snapshot().progressThousandths);
+
+  timer.primaryPressed(atMs(3600000));
+  timer.tick(atMs(3750000));
+  TEST_ASSERT_EQUAL_UINT16(300, timer.snapshot().progressThousandths);
+}
+
+void test_progress_grows_while_a_break_runs() {
+  TimerLogic timer;
+  timer.nextPressed(atMs(0));
+  timer.primaryPressed(atMs(0));
+
+  timer.tick(atMs(30000));
+  TEST_ASSERT_EQUAL_UINT16(100, timer.snapshot().progressThousandths);
+
+  timer.tick(atMs(150000));
+  TEST_ASSERT_EQUAL_UINT16(500, timer.snapshot().progressThousandths);
+}
+
+void test_progress_is_full_at_and_after_the_planned_duration() {
+  TimerLogic timer;
+  timer.primaryPressed(atMs(0));
+
+  // 24:59.999 in, 00:01 is still shown, so 1499 of 1500 seconds count as elapsed.
+  timer.tick(atMs(1499999));
+  TEST_ASSERT_EQUAL_UINT16(999, timer.snapshot().progressThousandths);
+
+  timer.tick(atMs(1500000));
+  TEST_ASSERT_EQUAL_UINT16(1000, timer.snapshot().progressThousandths);
+
+  timer.tick(atMs(1510000));
+  TEST_ASSERT_EQUAL_UINT16(1000, timer.snapshot().progressThousandths);
+}
+
+void test_progress_moves_only_when_the_shown_second_does() {
+  TimerLogic timer;
+  timer.nextPressed(atMs(0));
+  timer.primaryPressed(atMs(0));
+
+  timer.tick(atMs(999));
+  TEST_ASSERT_EQUAL_UINT16(0, timer.snapshot().progressThousandths);
+
+  // One second of a 300-second Break is 3.33 thousandths, rounded down.
+  timer.tick(atMs(1000));
+  TEST_ASSERT_EQUAL_UINT16(3, timer.snapshot().progressThousandths);
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_powers_on_as_a_ready_focus_at_25_00);
@@ -384,5 +462,11 @@ int main() {
   RUN_TEST(test_next_twice_from_a_running_focus_gives_a_fresh_ready_focus);
   RUN_TEST(test_next_twice_from_a_paused_focus_gives_a_fresh_ready_focus);
   RUN_TEST(test_a_full_focus_break_focus_loop_alternates_types);
+  RUN_TEST(test_progress_grows_while_a_focus_runs);
+  RUN_TEST(test_progress_is_empty_in_ready_including_after_next);
+  RUN_TEST(test_progress_holds_still_while_paused);
+  RUN_TEST(test_progress_grows_while_a_break_runs);
+  RUN_TEST(test_progress_is_full_at_and_after_the_planned_duration);
+  RUN_TEST(test_progress_moves_only_when_the_shown_second_does);
   return UNITY_END();
 }

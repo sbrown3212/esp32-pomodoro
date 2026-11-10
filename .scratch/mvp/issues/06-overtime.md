@@ -19,3 +19,5 @@
 ## Comments
 
 Ticket 02 added `test_countdown_stops_at_zero_at_and_after_the_planned_duration`, which pins the countdown stopping at 00:00. Overtime replaces that behaviour, so rewrite the test for entering Overtime rather than keeping it passing. Also, `draw()` centres the time on the width of a fixed `00:00`, so `+mm:ss` will need its own fixed centring width.
+
+Ticket 05 works out progress as `(planned seconds − shown seconds) / planned seconds`, and it is full only because the countdown stops at 00:00. Once the shown time becomes Overtime accrued, that sum gives wrong values. Make progress full in Overtime explicitly (story 22). `test_progress_is_full_at_and_after_the_planned_duration` will need its "after" case to stay at full.

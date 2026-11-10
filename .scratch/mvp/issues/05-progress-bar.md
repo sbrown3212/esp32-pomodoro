@@ -4,11 +4,22 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** needs-device-check
 
-- [ ] Snapshot exposes progress as elapsed against planned, capped at full
-- [ ] Progress is empty in Ready and grows while Running
-- [ ] Progress is unchanged while Paused (once ticket 03 is in)
-- [ ] Rendered as a bar along the bottom of the screen, below the large digits, without crowding them
-- [ ] Works for both Focus and Break (once ticket 04 is in)
+- [x] Snapshot exposes progress as elapsed against planned, capped at full
+- [x] Progress is empty in Ready and grows while Running
+- [x] Progress is unchanged while Paused (once ticket 03 is in)
+- [x] Rendered as a bar along the bottom of the screen, below the large digits, without crowding them
+- [x] Works for both Focus and Break (once ticket 04 is in)
 - [ ] Verified by hand on the device
+
+## Comments
+
+The snapshot gives progress as `progressThousandths`, from 0 (empty) to 1000 (full). It is worked out from the shown whole seconds rather than the exact elapsed time, so it changes only when the shown second does, and the screen still redraws at most once a second. Capping at full comes from the countdown stopping at 00:00.
+
+The hardware layer draws a 124 × 6 px outline on the 2 px bottom margin, at y 56–61, which leaves a 7 px gap below the time digits. The fill sits inside it with a 1 px gap, up to 120 × 2 px. An empty bar is just the outline. The firmware builds, but it has not run on a board.
+
+Please check on the device:
+- **Ready:** the bar is an empty outline and doesn't crowd the digits.
+- **Running:** it fills from the left as a Focus runs, holds still while Paused, and empties again after Next.
+- **Break:** it fills visibly faster, by about one pixel every 2.5 seconds.

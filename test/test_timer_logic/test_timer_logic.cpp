@@ -232,6 +232,125 @@ void test_next_from_a_paused_focus_gives_a_break_at_its_full_duration() {
   assertSnapshot(IntervalType::Break, RunState::Running, 290, timer.snapshot());
 }
 
+void test_next_from_a_ready_break_gives_back_a_ready_focus_at_25_00() {
+  TimerLogic timer;
+  timer.nextPressed(atMs(1000));
+
+  timer.nextPressed(atMs(2000));
+
+  assertSnapshot(IntervalType::Focus, RunState::Ready, 1500, timer.snapshot());
+}
+
+void test_primary_starts_a_break_that_counts_down_to_zero_at_5_00() {
+  TimerLogic timer;
+  timer.nextPressed(atMs(0));
+
+  timer.primaryPressed(atMs(1000));
+  assertSnapshot(IntervalType::Break, RunState::Running, 300, timer.snapshot());
+
+  timer.tick(atMs(2000));
+  assertSnapshot(IntervalType::Break, RunState::Running, 299, timer.snapshot());
+
+  // 4:59.999 into the Break, one millisecond is left.
+  timer.tick(atMs(300999));
+  assertSnapshot(IntervalType::Break, RunState::Running, 1, timer.snapshot());
+
+  timer.tick(atMs(301000));
+  assertSnapshot(IntervalType::Break, RunState::Running, 0, timer.snapshot());
+}
+
+void test_primary_pauses_and_resumes_a_break_from_where_it_stopped() {
+  TimerLogic timer;
+  timer.nextPressed(atMs(0));
+  timer.primaryPressed(atMs(0));
+
+  timer.primaryPressed(atMs(10000));
+  assertSnapshot(IntervalType::Break, RunState::Paused, 290, timer.snapshot());
+
+  timer.tick(atMs(70000));
+  assertSnapshot(IntervalType::Break, RunState::Paused, 290, timer.snapshot());
+
+  timer.primaryPressed(atMs(70000));
+  assertSnapshot(IntervalType::Break, RunState::Running, 290, timer.snapshot());
+
+  timer.tick(atMs(75000));
+  assertSnapshot(IntervalType::Break, RunState::Running, 285, timer.snapshot());
+}
+
+void test_next_from_a_running_break_gives_a_ready_focus_that_does_not_count_down() {
+  TimerLogic timer;
+  timer.nextPressed(atMs(0));
+  timer.primaryPressed(atMs(0));
+  timer.tick(atMs(60000));
+
+  timer.nextPressed(atMs(60000));
+  assertSnapshot(IntervalType::Focus, RunState::Ready, 1500, timer.snapshot());
+
+  timer.tick(atMs(120000));
+  assertSnapshot(IntervalType::Focus, RunState::Ready, 1500, timer.snapshot());
+}
+
+void test_next_from_a_paused_break_gives_a_focus_at_its_full_duration() {
+  TimerLogic timer;
+  timer.nextPressed(atMs(0));
+  timer.primaryPressed(atMs(0));
+  timer.primaryPressed(atMs(60000));
+
+  timer.nextPressed(atMs(70000));
+  assertSnapshot(IntervalType::Focus, RunState::Ready, 1500, timer.snapshot());
+
+  // The Break's minute must not carry into the Focus.
+  timer.primaryPressed(atMs(80000));
+  timer.tick(atMs(90000));
+  assertSnapshot(IntervalType::Focus, RunState::Running, 1490, timer.snapshot());
+}
+
+void test_next_twice_from_a_running_focus_gives_a_fresh_ready_focus() {
+  TimerLogic timer;
+  timer.primaryPressed(atMs(0));
+  timer.tick(atMs(600000));
+
+  timer.nextPressed(atMs(600000));
+  timer.nextPressed(atMs(601000));
+
+  assertSnapshot(IntervalType::Focus, RunState::Ready, 1500, timer.snapshot());
+}
+
+void test_next_twice_from_a_paused_focus_gives_a_fresh_ready_focus() {
+  TimerLogic timer;
+  timer.primaryPressed(atMs(0));
+  timer.primaryPressed(atMs(600000));
+
+  timer.nextPressed(atMs(700000));
+  timer.nextPressed(atMs(701000));
+  assertSnapshot(IntervalType::Focus, RunState::Ready, 1500, timer.snapshot());
+
+  timer.primaryPressed(atMs(800000));
+  timer.tick(atMs(801000));
+  assertSnapshot(IntervalType::Focus, RunState::Running, 1499, timer.snapshot());
+}
+
+void test_a_full_focus_break_focus_loop_alternates_types() {
+  TimerLogic timer;
+
+  timer.primaryPressed(atMs(0));
+  timer.tick(atMs(1500000));
+  timer.nextPressed(atMs(1500000));
+  assertSnapshot(IntervalType::Break, RunState::Ready, 300, timer.snapshot());
+
+  timer.primaryPressed(atMs(1510000));
+  timer.tick(atMs(1810000));
+  timer.nextPressed(atMs(1810000));
+  assertSnapshot(IntervalType::Focus, RunState::Ready, 1500, timer.snapshot());
+
+  timer.primaryPressed(atMs(1820000));
+  timer.tick(atMs(1830000));
+  assertSnapshot(IntervalType::Focus, RunState::Running, 1490, timer.snapshot());
+
+  timer.nextPressed(atMs(1830000));
+  assertSnapshot(IntervalType::Break, RunState::Ready, 300, timer.snapshot());
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_powers_on_as_a_ready_focus_at_25_00);
@@ -249,5 +368,13 @@ int main() {
   RUN_TEST(test_next_from_a_ready_focus_gives_a_ready_break_at_5_00);
   RUN_TEST(test_next_from_a_running_focus_gives_a_ready_break_that_does_not_count_down);
   RUN_TEST(test_next_from_a_paused_focus_gives_a_break_at_its_full_duration);
+  RUN_TEST(test_next_from_a_ready_break_gives_back_a_ready_focus_at_25_00);
+  RUN_TEST(test_primary_starts_a_break_that_counts_down_to_zero_at_5_00);
+  RUN_TEST(test_primary_pauses_and_resumes_a_break_from_where_it_stopped);
+  RUN_TEST(test_next_from_a_running_break_gives_a_ready_focus_that_does_not_count_down);
+  RUN_TEST(test_next_from_a_paused_break_gives_a_focus_at_its_full_duration);
+  RUN_TEST(test_next_twice_from_a_running_focus_gives_a_fresh_ready_focus);
+  RUN_TEST(test_next_twice_from_a_paused_focus_gives_a_fresh_ready_focus);
+  RUN_TEST(test_a_full_focus_break_focus_loop_alternates_types);
   return UNITY_END();
 }

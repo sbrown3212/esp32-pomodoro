@@ -4,17 +4,19 @@
 
 **Blocked by:** 03
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Points in time and lengths of time have distinct types. Adding two points in time, or passing a length where a point in time is expected, fails to compile (check it with `static_assert`s or by hand, and say which in the comments)
-- [ ] Both types hold a 64-bit millisecond count, named explicitly (e.g. `std::chrono::duration<uint64_t, std::milli>`), not left to `std::chrono::milliseconds`, whose size the standard doesn't fix; a `static_assert` pins this
-- [ ] The device clock type has no `now()`, so the timer logic still never reads a clock; a one-line comment says why the type exists
-- [ ] `FOCUS_DURATION_MS` and `BREAK_DURATION_MS` become lengths of time, still named constants in one place
-- [ ] The inputs (Primary pressed, Next pressed, tick) take a point in time; the snapshot's time to show stays in whole seconds
-- [ ] The hardware layer turns `esp_timer_get_time()` into a point in time in one place
-- [ ] Behaviour is unchanged: existing tests change only in how they write timestamps, and no expected value changes
-- [ ] Verified by hand: the device starts, counts down, pauses and resumes as before
+- [x] Points in time and lengths of time have distinct types. Adding two points in time, or passing a length where a point in time is expected, fails to compile (check it with `static_assert`s or by hand, and say which in the comments)
+- [x] Both types hold a 64-bit millisecond count, named explicitly (e.g. `std::chrono::duration<uint64_t, std::milli>`), not left to `std::chrono::milliseconds`, whose size the standard doesn't fix; a `static_assert` pins this
+- [x] The device clock type has no `now()`, so the timer logic still never reads a clock; a one-line comment says why the type exists
+- [x] `FOCUS_DURATION_MS` and `BREAK_DURATION_MS` become lengths of time, still named constants in one place
+- [x] The inputs (Primary pressed, Next pressed, tick) take a point in time; the snapshot's time to show stays in whole seconds
+- [x] The hardware layer turns `esp_timer_get_time()` into a point in time in one place
+- [x] Behaviour is unchanged: existing tests change only in how they write timestamps, and no expected value changes
+- [x] Verified by hand: the device starts, counts down, pauses and resumes as before
 
 ## Comments
 
 Doing this before 06 means one conversion now, instead of converting the Overtime limit, the alert's flash window and the blanking delay later. If 04 or 05 land first, convert any time arithmetic they add too.
+
+Implemented in `lib/timer_logic/timer_logic.h` as `DeviceClock`, `TimePoint` and `Duration`. The constants are now `FOCUS_DURATION` and `BREAK_DURATION`; the `_MS` suffix went because the type carries the unit. The checks that the types can't be mixed are `static_assert`s in the timer logic tests, and were also confirmed by compiling each forbidden case by hand. The device builds with gnu++2b, but the native test build is C++14, so the rounding is written out instead of using `std::chrono::ceil`.

@@ -4,14 +4,14 @@
 
 **Blocked by:** 02
 
-**Status:** needs-device-check
+**Status:** resolved
 
 - [x] Snapshot exposes progress as elapsed against planned, capped at full
 - [x] Progress is empty in Ready and grows while Running
 - [x] Progress is unchanged while Paused (once ticket 03 is in)
 - [x] Rendered as a bar along the bottom of the screen, below the large digits, without crowding them
 - [x] Works for both Focus and Break (once ticket 04 is in)
-- [ ] Verified by hand on the device
+- [x] Verified by hand on the device
 
 ## Comments
 
@@ -23,3 +23,5 @@ Please check on the device:
 - **Ready:** the bar is an empty outline and doesn't crowd the digits.
 - **Running:** it fills from the left as a Focus runs, holds still while Paused, and empties again after Next.
 - **Break:** it fills visibly faster, by about one pixel every 2.5 seconds.
+
+Confirmed on the device: the bar is an empty outline in Ready without crowding the digits. It fills from the left while a Focus runs, holds still while Paused, and empties after Next. In a Break it fills faster and reaches full at 00:00. The 3 px fill and the even gaps around the time read well.

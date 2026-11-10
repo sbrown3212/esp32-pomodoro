@@ -2,7 +2,7 @@
 
 **What to build:** When a Running Interval reaches its planned duration it does not end. It continues into Overtime, and its time keeps accruing to the Interval until the user presses Next, or until Overtime reaches the 60-minute Overtime limit, at which point the Interval ends exactly as if Next were pressed. Overtime is shown as `+mm:ss` counting up with an `OVER` tag, and the progress bar is full. A countdown never carries a sign. This applies to Focus and Break alike, and Overtime can be paused and resumed like any other Running Interval. No alert styling yet (ticket 07). Spec: `.scratch/mvp/spec.md` (stories 7, 17–24).
 
-**Blocked by:** 04, 05, 09
+**Blocked by:** 04, 05, 09, 10
 
 **Status:** ready-for-agent
 

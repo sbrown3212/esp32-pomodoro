@@ -1,5 +1,6 @@
 #include <unity.h>
 
+#include <chrono>
 #include <type_traits>
 #include <utility>
 
@@ -25,7 +26,7 @@ static_assert(!std::is_convertible<Duration, TimePoint>::value,
 static_assert(!std::is_convertible<uint64_t, TimePoint>::value,
               "a bare number must not pass where a point in time is expected");
 
-TimePoint at(uint64_t ms) {
+TimePoint atMs(uint64_t ms) {
   return TimePoint(Duration(ms));
 }
 
@@ -46,67 +47,67 @@ void test_powers_on_as_a_ready_focus_at_25_00() {
 void test_primary_starts_the_focus_and_ticks_count_down() {
   TimerLogic timer;
 
-  timer.primaryPressed(at(5000));
+  timer.primaryPressed(atMs(5000));
   assertSnapshot(IntervalType::Focus, RunState::Running, 1500, timer.snapshot());
 
-  timer.tick(at(6000));
+  timer.tick(atMs(6000));
   assertSnapshot(IntervalType::Focus, RunState::Running, 1499, timer.snapshot());
 
-  timer.tick(at(7000));
+  timer.tick(atMs(7000));
   assertSnapshot(IntervalType::Focus, RunState::Running, 1498, timer.snapshot());
 }
 
 void test_shown_seconds_round_up_so_a_part_second_still_counts() {
   TimerLogic timer;
-  timer.primaryPressed(at(0));
+  timer.primaryPressed(atMs(0));
 
-  timer.tick(at(1));
+  timer.tick(atMs(1));
   TEST_ASSERT_EQUAL_UINT32(1500, timer.snapshot().secondsToShow);
 
-  timer.tick(at(999));
+  timer.tick(atMs(999));
   TEST_ASSERT_EQUAL_UINT32(1500, timer.snapshot().secondsToShow);
 
-  timer.tick(at(1000));
+  timer.tick(atMs(1000));
   TEST_ASSERT_EQUAL_UINT32(1499, timer.snapshot().secondsToShow);
 
-  timer.tick(at(1001));
+  timer.tick(atMs(1001));
   TEST_ASSERT_EQUAL_UINT32(1499, timer.snapshot().secondsToShow);
 
   // 24:59.999 into the Focus, one millisecond is left.
-  timer.tick(at(1499999));
+  timer.tick(atMs(1499999));
   TEST_ASSERT_EQUAL_UINT32(1, timer.snapshot().secondsToShow);
 }
 
 void test_irregular_and_sparse_ticks_still_give_the_correct_time() {
   TimerLogic timer;
-  timer.primaryPressed(at(1000));
+  timer.primaryPressed(atMs(1000));
 
-  timer.tick(at(1003));
-  timer.tick(at(1700));
-  timer.tick(at(61000));  // A whole minute with no ticks.
+  timer.tick(atMs(1003));
+  timer.tick(atMs(1700));
+  timer.tick(atMs(61000));  // A whole minute with no ticks.
   TEST_ASSERT_EQUAL_UINT32(1440, timer.snapshot().secondsToShow);
 
-  timer.tick(at(61001));
-  timer.tick(at(601000));  // Nine more minutes from just one tick.
+  timer.tick(atMs(61001));
+  timer.tick(atMs(601000));  // Nine more minutes from just one tick.
   TEST_ASSERT_EQUAL_UINT32(900, timer.snapshot().secondsToShow);
 }
 
 void test_correct_time_after_weeks_of_uptime() {
   TimerLogic timer;
-  const uint64_t sixtyDaysMs = 5184000000ULL;
+  const TimePoint sixtyDays = TimePoint(std::chrono::hours(24 * 60));
 
-  timer.primaryPressed(at(sixtyDaysMs));
-  timer.tick(at(sixtyDaysMs + 90000));
+  timer.primaryPressed(sixtyDays);
+  timer.tick(sixtyDays + std::chrono::seconds(90));
 
   TEST_ASSERT_EQUAL_UINT32(1410, timer.snapshot().secondsToShow);
 }
 
 void test_correct_time_when_a_focus_spans_the_32_bit_millisecond_rollover() {
   TimerLogic timer;
-  const uint64_t rolloverMs = 4294967296ULL;
+  const TimePoint rollover = atMs(4294967296ULL);  // 2^32 ms: where a 32-bit count wraps
 
-  timer.primaryPressed(at(rolloverMs - 10000));
-  timer.tick(at(rolloverMs + 50000));
+  timer.primaryPressed(rollover - std::chrono::seconds(10));
+  timer.tick(rollover + std::chrono::seconds(50));
 
   TEST_ASSERT_EQUAL_UINT32(1440, timer.snapshot().secondsToShow);
 }
@@ -114,53 +115,53 @@ void test_correct_time_when_a_focus_spans_the_32_bit_millisecond_rollover() {
 // Until ticket 06 adds Overtime, the countdown stops at 00:00.
 void test_countdown_stops_at_zero_at_and_after_the_planned_duration() {
   TimerLogic timer;
-  timer.primaryPressed(at(0));
+  timer.primaryPressed(atMs(0));
 
-  timer.tick(at(1500000));
+  timer.tick(atMs(1500000));
   assertSnapshot(IntervalType::Focus, RunState::Running, 0, timer.snapshot());
 
-  timer.tick(at(1500001));
+  timer.tick(atMs(1500001));
   assertSnapshot(IntervalType::Focus, RunState::Running, 0, timer.snapshot());
 
-  timer.tick(at(1510000));
+  timer.tick(atMs(1510000));
   assertSnapshot(IntervalType::Focus, RunState::Running, 0, timer.snapshot());
 }
 
 void test_primary_while_running_pauses_the_focus() {
   TimerLogic timer;
-  timer.primaryPressed(at(0));
-  timer.tick(at(10000));
+  timer.primaryPressed(atMs(0));
+  timer.tick(atMs(10000));
 
-  timer.primaryPressed(at(10000));
+  timer.primaryPressed(atMs(10000));
 
   assertSnapshot(IntervalType::Focus, RunState::Paused, 1490, timer.snapshot());
 }
 
 void test_time_shown_does_not_change_while_paused() {
   TimerLogic timer;
-  timer.primaryPressed(at(0));
-  timer.primaryPressed(at(10000));
+  timer.primaryPressed(atMs(0));
+  timer.primaryPressed(atMs(10000));
 
-  timer.tick(at(10001));
+  timer.tick(atMs(10001));
   assertSnapshot(IntervalType::Focus, RunState::Paused, 1490, timer.snapshot());
 
-  timer.tick(at(70000));
+  timer.tick(atMs(70000));
   assertSnapshot(IntervalType::Focus, RunState::Paused, 1490, timer.snapshot());
 
   // Far longer than the Focus itself.
-  timer.tick(at(10000000));
+  timer.tick(atMs(10000000));
   assertSnapshot(IntervalType::Focus, RunState::Paused, 1490, timer.snapshot());
 }
 
 void test_primary_while_paused_resumes_from_where_it_stopped() {
   TimerLogic timer;
-  timer.primaryPressed(at(0));
-  timer.primaryPressed(at(10000));
+  timer.primaryPressed(atMs(0));
+  timer.primaryPressed(atMs(10000));
 
-  timer.primaryPressed(at(70000));
+  timer.primaryPressed(atMs(70000));
   assertSnapshot(IntervalType::Focus, RunState::Running, 1490, timer.snapshot());
 
-  timer.tick(at(75000));
+  timer.tick(atMs(75000));
   assertSnapshot(IntervalType::Focus, RunState::Running, 1485, timer.snapshot());
 }
 
@@ -168,12 +169,12 @@ void test_part_seconds_across_several_pauses_add_up_exactly() {
   TimerLogic timer;
 
   // Runs of 0.4 s, 0.7 s and 0.9 s, split by pauses of very different lengths.
-  timer.primaryPressed(at(1000));
-  timer.primaryPressed(at(1400));
-  timer.primaryPressed(at(6400));
-  timer.primaryPressed(at(7100));
-  timer.primaryPressed(at(3607100));
-  timer.tick(at(3608000));
+  timer.primaryPressed(atMs(1000));
+  timer.primaryPressed(atMs(1400));
+  timer.primaryPressed(atMs(6400));
+  timer.primaryPressed(atMs(7100));
+  timer.primaryPressed(atMs(3607100));
+  timer.tick(atMs(3608000));
 
   // 2.0 s elapsed in total.
   assertSnapshot(IntervalType::Focus, RunState::Running, 1498, timer.snapshot());
@@ -183,17 +184,17 @@ void test_snapshot_only_changes_when_the_shown_second_or_state_changes() {
   TimerLogic timer;
   const Snapshot ready = timer.snapshot();
 
-  timer.tick(at(500));
+  timer.tick(atMs(500));
   TEST_ASSERT_TRUE(ready == timer.snapshot());
 
-  timer.primaryPressed(at(1000));
+  timer.primaryPressed(atMs(1000));
   const Snapshot started = timer.snapshot();
   TEST_ASSERT_TRUE(ready != started);
 
-  timer.tick(at(1999));
+  timer.tick(atMs(1999));
   TEST_ASSERT_TRUE(started == timer.snapshot());
 
-  timer.tick(at(2000));
+  timer.tick(atMs(2000));
   TEST_ASSERT_TRUE(started != timer.snapshot());
 }
 

@@ -332,22 +332,30 @@ void test_next_twice_from_a_paused_focus_gives_a_fresh_ready_focus() {
 
 void test_a_full_focus_break_focus_loop_alternates_types() {
   TimerLogic timer;
+  using std::chrono::minutes;
+  using std::chrono::seconds;
 
-  timer.primaryPressed(atMs(0));
-  timer.tick(atMs(1500000));
-  timer.nextPressed(atMs(1500000));
+  TimePoint now = atMs(0);
+  timer.primaryPressed(now);
+  now += minutes(25);
+  timer.tick(now);
+  timer.nextPressed(now);
   assertSnapshot(IntervalType::Break, RunState::Ready, 300, timer.snapshot());
 
-  timer.primaryPressed(atMs(1510000));
-  timer.tick(atMs(1810000));
-  timer.nextPressed(atMs(1810000));
+  now += seconds(10);
+  timer.primaryPressed(now);
+  now += minutes(5);
+  timer.tick(now);
+  timer.nextPressed(now);
   assertSnapshot(IntervalType::Focus, RunState::Ready, 1500, timer.snapshot());
 
-  timer.primaryPressed(atMs(1820000));
-  timer.tick(atMs(1830000));
+  now += seconds(10);
+  timer.primaryPressed(now);
+  now += seconds(10);
+  timer.tick(now);
   assertSnapshot(IntervalType::Focus, RunState::Running, 1490, timer.snapshot());
 
-  timer.nextPressed(atMs(1830000));
+  timer.nextPressed(now);
   assertSnapshot(IntervalType::Break, RunState::Ready, 300, timer.snapshot());
 }
 

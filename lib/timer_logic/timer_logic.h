@@ -39,10 +39,12 @@ struct Snapshot {
   IntervalType intervalType;
   RunState runState;
   uint32_t secondsToShow;
+  // Elapsed against planned time, from 0 (empty) to 1000 (full). Moves only when the shown second does.
+  uint16_t progressThousandths;
 
   bool operator==(const Snapshot &other) const {
     return intervalType == other.intervalType && runState == other.runState &&
-           secondsToShow == other.secondsToShow;
+           secondsToShow == other.secondsToShow && progressThousandths == other.progressThousandths;
   }
   bool operator!=(const Snapshot &other) const { return !(*this == other); }
 };

@@ -359,6 +359,17 @@ void test_a_full_focus_break_focus_loop_alternates_types() {
   assertSnapshot(IntervalType::Break, RunState::Ready, 300, timer.snapshot());
 }
 
+void test_progress_grows_while_a_focus_runs() {
+  TimerLogic timer;
+  timer.primaryPressed(atMs(0));
+
+  timer.tick(atMs(150000));
+  TEST_ASSERT_EQUAL_UINT16(100, timer.snapshot().progressThousandths);
+
+  timer.tick(atMs(750000));
+  TEST_ASSERT_EQUAL_UINT16(500, timer.snapshot().progressThousandths);
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_powers_on_as_a_ready_focus_at_25_00);
@@ -384,5 +395,6 @@ int main() {
   RUN_TEST(test_next_twice_from_a_running_focus_gives_a_fresh_ready_focus);
   RUN_TEST(test_next_twice_from_a_paused_focus_gives_a_fresh_ready_focus);
   RUN_TEST(test_a_full_focus_break_focus_loop_alternates_types);
+  RUN_TEST(test_progress_grows_while_a_focus_runs);
   return UNITY_END();
 }

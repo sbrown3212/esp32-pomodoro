@@ -4,7 +4,7 @@
 
 **Blocked by:** 03
 
-**Status:** needs-device-check
+**Status:** resolved
 
 - [x] Points in time and lengths of time have distinct types. Adding two points in time, or passing a length where a point in time is expected, fails to compile (check it with `static_assert`s or by hand, and say which in the comments)
 - [x] Both types hold a 64-bit millisecond count, named explicitly (e.g. `std::chrono::duration<uint64_t, std::milli>`), not left to `std::chrono::milliseconds`, whose size the standard doesn't fix; a `static_assert` pins this
@@ -13,7 +13,7 @@
 - [x] The inputs (Primary pressed, Next pressed, tick) take a point in time; the snapshot's time to show stays in whole seconds
 - [x] The hardware layer turns `esp_timer_get_time()` into a point in time in one place
 - [x] Behaviour is unchanged: existing tests change only in how they write timestamps, and no expected value changes
-- [ ] Verified by hand: the device starts, counts down, pauses and resumes as before
+- [x] Verified by hand: the device starts, counts down, pauses and resumes as before
 
 ## Comments
 

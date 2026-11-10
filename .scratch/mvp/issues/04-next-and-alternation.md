@@ -4,7 +4,7 @@
 
 **Blocked by:** 03
 
-**Status:** needs-device-check
+**Status:** resolved
 
 - [x] Next from Ready, Running and Paused → Ready, next Interval type, at full planned duration
 - [x] Next never starts the clock
@@ -13,7 +13,7 @@
 - [x] Every cell of the spec's button table (excluding blanked and Overtime, covered later) is tested in both Focus and Break
 - [x] Pause and resume behave identically in a Break
 - [x] Next button is wired through the hardware layer; header shows `BREAK` during a Break
-- [ ] Verified by hand: Focus → Next → Break → Next → Focus on the device
+- [x] Verified by hand: Focus → Next → Break → Next → Focus on the device
 
 ## Comments
 
@@ -22,3 +22,5 @@ Ticket 03 banks a paused Interval's elapsed time in the timer logic, and startin
 Next toggles the Interval type, returns to Ready and clears the banked elapsed time, so a Ready Interval is always at its full planned duration. The planned duration now follows the Interval type. The hardware layer already called `nextPressed` and drew `BREAK` for a Break, so `src/main.cpp` is unchanged. The new behaviour comes from the snapshot now carrying the real Interval type. Tests cover all six button-table cells, outside blanking and Overtime, for both Focus and Break. They also cover the Next toggle from Ready, Next twice from Running and from Paused, and a full Focus → Break → Focus loop. The firmware builds, but it has not run on a board.
 
 Please check on the device: from a Ready Focus, press Next to see `BREAK` `READY` 05:00, then press Next again to see `FOCUS` `READY` 25:00. Start a Focus, press Next while it is Running and again while it is Paused, and check that each press gives a Ready Interval at full time that doesn't count down. Then run Focus → Next → Break → Next → Focus.
+
+Confirmed on the device: Next toggles between a Ready Focus and a Ready Break, gives a full-length Ready Interval from Running and Paused without starting the clock, and a full Focus → Next → Break → Next → Focus run works.

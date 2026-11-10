@@ -18,6 +18,7 @@ void TimerLogic::primaryPressed(TimePoint now) {
 void TimerLogic::nextPressed(TimePoint now) {
   now_ = now;
   intervalType_ = intervalType_ == IntervalType::Focus ? IntervalType::Break : IntervalType::Focus;
+  runState_ = RunState::Ready;
 }
 
 void TimerLogic::tick(TimePoint now) {

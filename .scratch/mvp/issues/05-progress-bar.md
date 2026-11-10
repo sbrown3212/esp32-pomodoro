@@ -17,7 +17,7 @@
 
 The snapshot gives progress as `progressThousandths`, from 0 (empty) to 1000 (full). It is worked out from the shown whole seconds rather than the exact elapsed time, so it changes only when the shown second does, and the screen still redraws at most once a second. Capping at full comes from the countdown stopping at 00:00.
 
-The hardware layer draws a 124 × 6 px outline on the 2 px bottom margin, at y 56–61, which leaves a 7 px gap below the time digits. The fill sits inside it with a 1 px gap, up to 120 × 2 px. An empty bar is just the outline. The firmware builds, but it has not run on a board.
+The hardware layer draws a 124 × 7 px outline on the 2 px bottom margin, at y 55–61. The fill sits inside it with a 1 px gap, up to 120 × 3 px. An empty bar is just the outline. A 2 px fill looked thin on the device, so the bar grew to 7 px. To keep space below the time, the time baseline moved up from 48 to 47. That leaves an even 8 px gap between the header and the digits (rows 11–18), and between the digits and the bar (rows 47–54).
 
 Please check on the device:
 - **Ready:** the bar is an empty outline and doesn't crowd the digits.

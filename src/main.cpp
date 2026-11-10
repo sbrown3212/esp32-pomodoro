@@ -18,9 +18,10 @@ constexpr uint8_t DISPLAY_CONTRAST = 16;
 
 constexpr int MARGIN_PX = 2;
 constexpr int HEADER_BASELINE_Y = 11;
-constexpr int TIME_BASELINE_Y = 48;
+// Digits sit on the row above their baseline, so 47 leaves an even 8 px gap to the header and to the bar.
+constexpr int TIME_BASELINE_Y = 47;
 // The bar sits on the bottom margin, leaving a gap of several pixels below the time digits.
-constexpr int PROGRESS_BAR_HEIGHT_PX = 6;
+constexpr int PROGRESS_BAR_HEIGHT_PX = 7;
 // Between the bar's outline and its fill, so an empty bar and a nearly empty one look different.
 constexpr int PROGRESS_FILL_INSET_PX = 2;
 

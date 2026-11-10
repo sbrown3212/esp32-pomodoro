@@ -17,6 +17,7 @@ void TimerLogic::primaryPressed(TimePoint now) {
 
 void TimerLogic::nextPressed(TimePoint now) {
   now_ = now;
+  intervalType_ = intervalType_ == IntervalType::Focus ? IntervalType::Break : IntervalType::Focus;
 }
 
 void TimerLogic::tick(TimePoint now) {
@@ -26,10 +27,11 @@ void TimerLogic::tick(TimePoint now) {
 Snapshot TimerLogic::snapshot() const {
   const Duration elapsed =
       elapsedAtLastPause_ + (runState_ == RunState::Running ? now_ - runningSince_ : Duration::zero());
-  const Duration remaining = elapsed < FOCUS_DURATION ? FOCUS_DURATION - elapsed : Duration::zero();
+  const Duration planned = intervalType_ == IntervalType::Focus ? FOCUS_DURATION : BREAK_DURATION;
+  const Duration remaining = elapsed < planned ? planned - elapsed : Duration::zero();
   // Rounding up shows 25:00 at the start, and 00:01 until the planned duration is reached.
   // Written out because std::chrono::ceil needs C++17, and the native test build is C++14.
   const Duration oneSecond = std::chrono::seconds(1);
   const uint64_t secondsToShow = (remaining + oneSecond - Duration(1)) / oneSecond;
-  return {IntervalType::Focus, runState_, static_cast<uint32_t>(secondsToShow)};
+  return {intervalType_, runState_, static_cast<uint32_t>(secondsToShow)};
 }

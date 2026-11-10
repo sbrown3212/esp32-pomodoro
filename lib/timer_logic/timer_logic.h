@@ -57,6 +57,7 @@ class TimerLogic {
   Snapshot snapshot() const;
 
  private:
+  IntervalType intervalType_ = IntervalType::Focus;
   RunState runState_ = RunState::Ready;
   // Zero until the Interval is first paused.
   Duration elapsedAtLastPause_ = Duration::zero();

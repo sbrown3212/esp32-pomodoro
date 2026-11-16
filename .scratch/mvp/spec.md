@@ -176,7 +176,7 @@ A small standalone device: an ESP32 DevKit V1 with a 128×64 OLED and two button
   - irregular tick spacing producing correct times
 - **Tested module:** the timer logic only, run in the native environment with PlatformIO's test runner (Unity), developed test-first.
 - **Not unit-tested:** the hardware layer (debouncing, drawing, pins). It is verified by hand on the device with a full Focus → Overtime → Next → Break → Focus run, checking layout, readability, alert appearance and the absence of flicker.
-- **Prior art:** none. The repo is greenfield, so these tests set the pattern.
+- **Prior art:** `test/test_timer_logic/test_timer_logic.cpp`. Follow its scenario-style test names, its `atMs` timestamps and its `assertSnapshot` helper.
 
 ## Out of Scope
 

@@ -6,9 +6,9 @@
 
 **Status:** needs-triage
 
-## Why now
+## Deferred
 
-Ticket 04 implements Next as the spec describes. It was confirmed on the device, and this ticket doesn't change it. Ticket 06 (Overtime) will build in "Next while Running in Overtime ends the Interval" (story 19), and ticket 07 builds alert behaviour on top of that. Decide this before 06 starts, so its tests don't have to be rewritten.
+Deferred until after the MVP, and listed in the spec's Out of Scope. Tickets 06–08 are built to the current spec, so Next still ends the Interval from Running and Paused. Picking this up later means changing the expected values in their tests for Next while Running. See the triage notes under Comments for the reasoning and the B2 lean.
 
 ## Options
 
@@ -30,7 +30,7 @@ Ticket 04 implements Next as the spec describes. It was confirmed on the device,
   - B1: nothing at all.
   - B2: it stops the clock (→ Paused), the same as Primary.
 
-  B2 means a stray Next costs nothing, because Primary resumes. Two deliberate Next presses then still end a Running Interval, which keeps stories 13 and 14 intact. B1 makes Next do nothing visible, which may feel like a dead button.
+  B2 means a stray Next costs nothing, because Primary resumes. Two deliberate Next presses then still end a Running Interval, which keeps story 13. Story 14 doesn't survive: a reset from a Running Focus takes three presses (pause, Ready Break, Ready Focus). B1 makes Next do nothing visible, which may feel like a dead button.
 - **Open question:** after the clock is stopped, which press moves on? Next is the natural choice. Primary already means "resume" while Paused (story 4), so using Primary to advance would change the meaning of Primary too.
 
 ### Other ideas to consider
@@ -52,7 +52,7 @@ Ticket 04 implements Next as the spec describes. It was confirmed on the device,
 
 - [ ] Choose an option, using a few real Focus/Break cycles on the device as evidence of how often accidental presses happen
 - [ ] Update the spec: stories 9, 13, 14 and 19 as needed, the button table, and the glossary entry for Next if its meaning changes
-- [ ] Update tickets 06 and 07 to match the chosen option. 06 is already blocked by this ticket; unblock it early only if the choice leaves Overtime unchanged
+- [ ] Update tickets 06 and 07 to match the chosen option, or, if they're already built, list the tests whose expected values change
 - [ ] Rewrite this ticket as a build ticket with acceptance criteria, then move it to `ready-for-agent`
 
 ## Comments

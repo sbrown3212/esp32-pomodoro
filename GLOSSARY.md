@@ -43,6 +43,10 @@ _Avoid_: Cap, timeout
 
 ## Actions
 
+**Primary**:
+Start or stop the clock: start a Ready Interval, pause a Running one, or resume a Paused one.
+_Avoid_: Start, Start/Stop, Play
+
 **Next**:
 End the current Interval and make the next Interval type Ready.
 _Avoid_: Skip, end, reset

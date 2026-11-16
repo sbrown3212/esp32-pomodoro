@@ -189,6 +189,7 @@ Listed roughly in priority order where known. Each becomes its own spec or ticke
 - **Flowtime-style mode**: Focus counts up from zero with no planned length, and the Break is sized from the Focus length.
 - **On-device duration settings.**
 - **Button layout experiments**: a Reset action, a third button, long-press / double-press / hold-to-repeat gestures (e.g. for settings menus), hold-to-confirm against accidental presses.
+- **Guard against an accidental Next**: today a stray Next while Running or Paused ends the Interval and throws away its elapsed time. The first thing to try is making Next while Running pause, the same as Primary, so a stray press costs nothing. Options and trade-offs are in ticket 10 (`.scratch/mvp/issues/10-next-button-guard.md`).
 - **Buzzer alert.**
 - **Pixel shifting**: periodically shift the whole layout by a pixel or two (e.g. each new Interval) to spread burn-in from static elements such as the header text and the colon. Needs a decision on whether the timer logic or the hardware layer chooses the offset.
 - **Battery power and deep sleep.**
